@@ -1,16 +1,24 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import allFriends from "../data/friends.json";
 
 function FriendTracker() {
 	const [checkedFriends, setCheckedFriends] = useState({});
 
+	useEffect(() => {
+		const storedFriends = localStorage.getItem("checkedFriends");
+		if (storedFriends) {
+			setCheckedFriends(JSON.parse(storedFriends));
+		}
+	}, []);
+
 	const handleCheck = (friend) => {
-		setCheckedFriends((prevState) => ({
-			...prevState,
-			[friend]: !prevState[friend],
-		}));
+		setCheckedFriends((prevState) => {
+			const newState = { ...prevState, [friend]: !prevState[friend] };
+			localStorage.setItem("checkedFriends", JSON.stringify(newState));
+			return newState;
+		});
 	};
 
 	// Count the number of checked friends
