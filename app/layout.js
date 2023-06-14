@@ -1,10 +1,10 @@
-"use client";
+
 
 import "./globals.css";
-import { useEffect, useState } from "react";
+
 import { Inter } from "next/font/google";
-import supabase from "@/data/supabaseClient";
-import SignInForm from "@/components/SignIn";
+
+
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -14,22 +14,7 @@ export const metadata = {
 };
 
 export default function RootLayout({ children }) {
-	const [loading, setLoading] = useState(true);
-	const [signedIn, setSignedIn] = useState(false);
 
-	useEffect(() => {
-		const user = supabase.auth.user();
-		setSignedIn(Boolean(user));
-		setLoading(false);
-	}, []);
-
-
-  if(loading){
-    return <div>Loading...</div>
-  }
-  if(!signedIn){
-    return <SignInForm />;
-  }
 
 	return (
 		<html lang="en">

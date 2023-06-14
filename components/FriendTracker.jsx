@@ -1,29 +1,37 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import allFriends from "../data/friends.json";
+import supabase from "@/data/supabaseClient";
 
 function FriendTracker() {
-	const [checkedFriends, setCheckedFriends] = useState({});
+	const [allFriends, setAllFriends] = useState([]);
 
 	useEffect(() => {
-		const storedFriends = localStorage.getItem("checkedFriends");
-		if (storedFriends) {
-			setCheckedFriends(JSON.parse(storedFriends));
-		}
+		const fetchFriends = async () => {
+			const { data, error } = await supabase
+				.from("friends")
+				.select("name, checked");
+			if (error) console.error(error);
+			else setAllFriends(data);
+		};
+		fetchFriends();
 	}, []);
 
-	const handleCheck = (friend) => {
-		setCheckedFriends((prevState) => {
-			const newState = { ...prevState, [friend]: !prevState[friend] };
-			localStorage.setItem("checkedFriends", JSON.stringify(newState));
-			return newState;
-		});
-	};
+	const handleCheck = async (friendName) => {
+		const friend = allFriends.find((friend) => friend.name === friendName);
+		const { error } = await supabase
+			.from("friends")
+			.update({ checked: !friend.checked })
+			.eq("name", friendName);
 
-	// Count the number of checked friends
-	const checkedFriendsCount =
-		Object.values(checkedFriends).filter(Boolean).length;
+		if (error) console.error(error);
+		else
+			setAllFriends((allFriends) =>
+				allFriends.map((f) =>
+					f.name === friendName ? { ...f, checked: !f.checked } : f
+				)
+			);
+	};
 
 	return (
 		<div className="max-w-md mx-auto bg-white rounded-xl shadow-md overflow-hidden md:max-w-2xl m-4 p-4">
@@ -39,15 +47,15 @@ function FriendTracker() {
 						{checkedFriendsCount}/{allFriends.length} Friends
 					</h2>
 					{allFriends.map((friend) => (
-						<div key={friend} className="mt-2 text-black text-lg">
+						<div key={friend.name} className="mt-2 text-black text-lg">
 							<label className="inline-flex items-center">
 								<input
 									type="checkbox"
 									className="form-checkbox"
-									checked={checkedFriends[friend] || false}
-									onChange={() => handleCheck(friend)}
+									checked={friend.checked}
+									onChange={() => handleCheck(friend.name)}
 								/>
-								<span className="ml-2">{friend}</span>
+								<span className="ml-2">{friend.name}</span>
 							</label>
 						</div>
 					))}
