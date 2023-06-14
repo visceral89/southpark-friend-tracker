@@ -12,7 +12,10 @@ function FriendTracker() {
 				.from("friends")
 				.select("name, checked");
 			if (error) console.error(error);
-			else setAllFriends(data);
+			else {
+				data.sort((a, b) => a.checked - b.checked);
+				setAllFriends(data);
+			}
 		};
 		fetchFriends();
 	}, []);
@@ -45,7 +48,12 @@ function FriendTracker() {
 					</div>
 
 					{allFriends.map((friend) => (
-						<div key={friend.name} className="mt-2 text-black text-lg">
+						<div
+							key={friend.name}
+							className={`p-2 text-black text-lg ${
+								friend.checked ? "line-through text-gray-500" : ""
+							}`}
+						>
 							<label className="inline-flex items-center">
 								<input
 									type="checkbox"
